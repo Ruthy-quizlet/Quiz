@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Module Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .quiz-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .welcome-screen, .name-screen, .completion-screen, .batch-complete-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .question {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .options {
+            margin-bottom: 15px;
+        }
+        .option {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .option:hover {
+            background-color: #f0f0f0;
+        }
+        .selected {
+            background-color: #e0e0ff;
+            border-color: #b0b0ff;
+        }
+        .btn {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .btn.skip {
+            background-color: #ff9800;
+        }
+        .btn.skip:hover {
+            background-color: #e68a00;
+        }
+        .btn.restart {
+            background-color: #f44336;
+        }
+        .btn.restart:hover {
+            background-color: #d32f2f;
+        }
+        .progress {
+            margin-bottom: 20px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            height: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease;
+        }
+        .feedback {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .batch-title {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+        .score-display {
+            font-weight: bold;
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        .button-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .name-input {
+            width: 100%;
+            padding: 10px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .results-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .result-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .certificate {
+            border: 5px solid #4CAF50;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            background-color: #f9f9f9;
+        }
+        .certificate h2 {
+            color: #4CAF50;
+        }
+        .hidden {
+            display: none;
+        }
+        .batch-complete-message {
+            font-size: 24px;
+            color: #155724;
+            margin-bottom: 20px;
+        }
+        .batch-score {
+            font-size: 36px;
+            color: #155724;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="welcome-screen">
+            <h1>Knowledge Module Quiz</h1>
+            <p>Welcome to the Knowledge Module Quiz. This quiz will test your knowledge about various modules including Aged Care, Health Care, Education, Energy, and Other specialized areas.</p>
+            <p>You must complete each batch with a score of 3/3 to proceed to the next batch.</p>
+            <button id="start-btn" class="btn">I'm Ready to Start</button>
+        </div>
+
+        <!-- Name Input Screen -->
+        <div id="name-screen" class="name-screen hidden">
+            <h1>Enter Your Name</h1>
+            <p>Please enter your full name to begin the quiz:</p>
+            <input type="text" id="user-name" class="name-input" placeholder="Your Full Name">
+            <button id="submit-name-btn" class="btn">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quiz-section" class="hidden">
+            <div class="progress">
+                <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <h2 class="batch-title" id="batch-title">Knowledge Module</h2>
+            <div class="score-display">Score: <span id="score">0</span>/3</div>
+            <div id="feedback" class="feedback"></div>
+            <div class="quiz-container" id="quiz-container">
+                <div class="question" id="question"></div>
+                <div class="options" id="options"></div>
+                <div class="button-container">
+                    <button class="btn" id="submit-btn">Submit Answer</button>
+                    <button class="btn skip" id="skip-btn">Skip Question</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Batch Complete Screen -->
+        <div id="batch-complete-screen" class="batch-complete-screen hidden">
+            <div class="batch-complete-message">Batch Completed Successfully!</div>
+            <div class="batch-score">Score: <span id="batch-score">3/3</span></div>
+            <p>Congratulations! You've completed this batch of questions.</p>
+            <button class="btn" id="next-batch-btn">Proceed to Next Batch</button>
+        </div>
+
+        <!-- Completion Screen -->
+        <div id="completion-screen" class="completion-screen hidden">
+            <h1>Quiz Completed!</h1>
+            <p>Congratulations <span id="completion-name"></span>! You've successfully completed all batches of the Knowledge Module Quiz.</p>
+            <div class="certificate">
+                <h2>Certificate of Completion</h2>
+                <p>This certifies that</p>
+                <h3 id="certificate-name"></h3>
+                <p>has successfully completed the Knowledge Module Quiz</p>
+                <p>Date: <span id="completion-date"></span></p>
+            </div>
+            <div class="results-container">
+                <h3>Your Results:</h3>
+                <div id="results-list"></div>
+            </div>
+            <button class="btn" id="download-results-btn">Download Results</button>
+            <button class="btn restart" id="restart-quiz-btn">Exit Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data structure
+        const quizBatches = [
+            {
+                name: "AGED CARE MODULE",
+                questions: [
+                    {
+                        question: "Which of the following best describes the purpose of Home Care services?",
+                        options: [
+                            "A) Providing permanent accommodation for older Australians",
+                            "B) Supporting recipients in the comfort of their own home",
+                            "C) Offering lifestyle housing options",
+                            "D) Ensuring all aged care services meet quality standards"
+                        ],
+                        correctAnswer: 1
+                    },
+                    {
+                        question: "Retirement Villages are primarily regulated by:",
+                        options: [
+                            "A) Commonwealth Aged Care Act",
+                            "B) State and territory legislation",
+                            "C) Individual village operators",
+                            "D) Medicare regulations"
+                        ],
+                        correctAnswer: 1
+                    },
+                    {
+                        question: "Who is responsible for the governance of the aged care system according to the Registered Providers module?",
+                        options: [
+                            "A) Individual care providers only",
+                            "B) State governments exclusively",
+                            "C) The Commissioner of the Aged Care Quality and Safety Commission and Secretary of the Department of Health and Aged Care",
+                            "D) Retirement village operators"
+                        ],
+                        correctAnswer: 2
+                    },
+                    {
+                        question: "Which of the following is a key obligation under the Residential Care module?",
+                        options: [
+                            "A) Providing care only during business hours",
+                            "B) Refundable deposits management",
+                            "C) Focusing primarily on independent living",
+                            "D) Delivering services exclusively in consumers' homes"
+                        ],
+                        correctAnswer: 1
+                    }
+                ]
+            },
+            {
+                name: "HEALTH CARE MODULE",
+                questions: [
+                    {
+                        question: "Which module(s) does the National Health (Floor Price for Certain Brands of Pharmaceutical Items) Amendment Determination (No. 5) 2024 (Cth) alert belong to?",
+                        options: [
+                            "A) Clinical Care and Allied Health Services only",
+                            "B) Clinical Care and Allied Health Services, Community Care and Services, NSW Healthcare, and Queensland Healthcare",
+                            "C) NSW Healthcare, Clinical Care and Allied Health Services, Queensland Healthcare, and Aged Care - Home Care",
+                            "D) NSW Healthcare, Clinical Care and Allied Health Services, and Queensland Healthcare"
+                        ],
+                        correctAnswer: 3
+                    },
+                    {
+                        question: "Under which core obligation in the Therapeutic Goods module does the Therapeutic Goods (Authorised Supply) Amendment Rules 2025 (Cth) alert fall?",
+                        options: [
+                            "A) Medicines",
+                            "B) Sampling of Therapeutic Goods",
+                            "C) Therapeutic Goods Administration Enforcement",
+                            "D) Biologicals"
+                        ],
+                        correctAnswer: 0
+                    },
+                    {
+                        question: "The impact of this alert 'Medicines and Poisons (Medicines) Amendment Regulation (No. 3) 2025 (Qld)' provides that: Healthcare providers must update their procedures to reflect the new terminology and definitions, particularly regarding continuing opioid dependence treatment. Out of all the core obligations provided below, please identify the correct core obligation this alert falls into:",
+                        options: [
+                            "A) Workforce Management",
+                            "B) Medication Management",
+                            "C) Emergency Services",
+                            "D) Patient Care"
+                        ],
+                        correctAnswer: 1
+                    },
+                    {
+                        question: "Under which core obligation in the NSW Healthcare module does the Health Insurance (Section 3C Diagnostic Imaging Services – Cardiac MRI for Myocarditis) Repeal Determination 2025 (Cth) alert fall?",
+                        options: [
+                            "A) Medical Imaging",
+                            "B) Health Research",
+                            "C) Medication Management",
+                            "D) Physical Environment"
+                        ],
+                        correctAnswer: 0
+                    }
+                ]
+            },
+            {
+                name: "EDUCATION MODULE",
+                questions: [
+                    {
+                        question: "What is the primary purpose of the Education and Care Services National Law and National Regulations in Australia?",
+                        options: [
+                            "A) To ensure children under 13 receive safe, quality care and education",
+                            "B) To regulate only tertiary education providers",
+                            "C) To manage retirement villages",
+                            "D) To oversee residential aged care facilities"
+                        ],
+                        correctAnswer: 0
+                    },
+                    {
+                        question: "Which of the following is NOT listed as a key provider responsibility in Child Care & Education Services?",
+                        options: [
+                            "A) Educational program and practice",
+                            "B) Children's health, safety, and wellbeing",
+                            "C) International student recruitment",
+                            "D) Staffing arrangements and supervisor certificates"
+                        ],
+                        correctAnswer: 2
+                    },
+                    {
+                        question: "The National Code of Practice applies specifically to which type of education?",
+                        options: [
+                            "A) Primary education",
+                            "B) Secondary education",
+                            "C) Overseas students",
+                            "D) Special needs education"
+                        ],
+                        correctAnswer: 2
+                    },
+                    {
+                        question: "Commonwealth tertiary education providers include:",
+                        options: [
+                            "A) Only universities",
+                            "B) Only vocational education and training organizations",
+                            "C) Universities, colleges, and training organizations",
+                            "D) Only international student providers"
+                        ],
+                        correctAnswer: 2
+                    }
+                ]
+            },
+            {
+                name: "ENERGY MODULE",
+                questions: [
+                    {
+                        question: "Which of the following is NOT one of the primary frameworks covered in the Energy Retail Markets section?",
+                        options: [
+                            "A) National Energy Customer Framework",
+                            "B) Northern Territory Energy Framework",
+                            "C) Western Australia Energy Framework",
+                            "D) National Gas Market Framework"
+                        ],
+                        correctAnswer: 3
+                    },
+                    {
+                        question: "What does wholesale energy include in the Australian energy context?",
+                        options: [
+                            "A) Only the retail sale of electricity to residential customers",
+                            "B) Only the distribution of gas to commercial properties",
+                            "C) The generation and selling of electricity and gas to retailers, plus distribution and transmission in the wholesale market",
+                            "D) Only the regulation of energy prices for consumers"
+                        ],
+                        correctAnswer: 2
+                    },
+                    {
+                        question: "When creating alerts related to customers who require special consideration due to medical equipment needs, which specific topic in the Energy Retail Markets module should legal editors reference?",
+                        options: [
+                            "A) Hardship Policies",
+                            "B) Customers' Life Support Equipment",
+                            "C) De-energisation (Disconnection)",
+                            "D) Compensation"
+                        ],
+                        correctAnswer: 1
+                    },
+                    {
+                        question: "Which of the following is a fundamental legislative requirement that energy wholesalers must navigate according to the Energy Wholesale Markets module?",
+                        options: [
+                            "A) Customer billing procedures",
+                            "B) Transition to the Net Zero Economy",
+                            "C) Retail store operations",
+                            "D) International energy trading"
+                        ],
+                        correctAnswer: 1
+                    },
+                    {
+                        question: "As a legal editor creating alerts for organisations in Western Australia regarding wholesale electricity operations, which specific section of the Energy Wholesale Markets module would be most relevant to reference?",
+                        options: [
+                            "A) NEM Operation (National Electricity Rules)",
+                            "B) Northern Territory Electricity System and Market Operator (NTESMO)",
+                            "C) ESM Operation (WEM Rules)",
+                            "D) Wholesale Gas Licensing"
+                        ],
+                        correctAnswer: 2
+                    }
+                ]
+            },
+            {
+                name: "OTHER MODULES",
+                questions: [
+                    {
+                        question: "Which module requires organisations to maintain comprehensive programs for customer due diligence, suspicious matter reporting, and threshold transaction reporting?",
+                        options: [
+                            "A) Sanctions",
+                            "B) Anti-Money Laundering & Counter-Terrorism Financing (AML/CTF)",
+                            "C) Telecommunications",
+                            "D) Community Care and Services"
+                        ],
+                        correctAnswer: 1
+                    },
+                    {
+                        question: "The Heavy Vehicle National Law (HVNL) applies to vehicles over what weight threshold and introduces which key compliance concept?",
+                        options: [
+                            "A) 3.5 tonnes; duty of care",
+                            "B) 5.0 tonnes; shared responsibility",
+                            "C) 4.5 tonnes; chain of responsibility",
+                            "D) 6.0 tonnes; collective liability"
+                        ],
+                        correctAnswer: 2
+                    },
+                    {
+                        question: "Which of the following is NOT one of the four key areas where environmental compliance obligations arise?",
+                        options: [
+                            "A) Environmental approvals",
+                            "B) Environmental harm",
+                            "C) Development approvals",
+                            "D) Product safety standards"
+                        ],
+                        correctAnswer: 3
+                    },
+                    {
+                        question: "Community Care and Services providers obtain their contracts through which process, and their obligations are derived from which three main sources?",
+                        options: [
+                            "A) Direct government appointment; legislation, service agreements, and industry standards",
+                            "B) Competitive tender processes; legislation, individual service agreements, and government policy/standards",
+                            "C) Open market bidding; federal law, state regulations, and professional guidelines",
+                            "D) Merit-based selection; compliance frameworks, funding requirements, and quality measures"
+                        ],
+                        correctAnswer: 1
+                    }
+                ]
+            }
+        ];
+
+        // Quiz state
+        let userName = "";
+        let currentBatchIndex = 0;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+        let answeredQuestions = [];
+        let userResults = [];
+        let skippedQuestions = [];
+
+        // DOM elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const nameScreen = document.getElementById('name-screen');
+        const quizSection = document.getElementById('quiz-section');
+        const batchCompleteScreen = document.getElementById('batch-complete-screen');
+        const completionScreen = document.getElementById('completion-screen');
+        
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const submitButton = document.getElementById('submit-btn');
+        const skipButton = document.getElementById('skip-btn');
+        const nextBatchButton = document.getElementById('next-batch-btn');
+        const feedbackElement = document.getElementById('feedback');
+        const scoreElement = document.getElementById('score');
+        const batchTitleElement = document.getElementById('batch-title');
+        const progressBar = document.getElementById('progress-bar');
+        const batchScoreElement = document.getElementById('batch-score');
+        
+        const startButton = document.getElementById('start-btn');
+        const submitNameButton = document.getElementById('submit-name-btn');
+        const userNameInput = document.getElementById('user-name');
+        const completionNameElement = document.getElementById('completion-name');
+        const certificateNameElement = document.getElementById('certificate-name');
+        const completionDateElement = document.getElementById('completion-date');
+        const resultsListElement = document.getElementById('results-list');
+        const downloadResultsButton = document.getElementById('download-results-btn');
+        const restartQuizButton = document.getElementById('restart-quiz-btn');
+
+        // Initialize the quiz
+        function initQuiz() {
+            // Check if there's saved progress
+            loadProgress();
+            
+            // Event listeners
+            startButton.addEventListener('click', showNameScreen);
+            submitNameButton.addEventListener('click', startQuiz);
+            submitButton.addEventListener('click', checkAnswer);
+            skipButton.addEventListener('click', skipQuestion);
+            nextBatchButton.addEventListener('click', moveToNextBatch);
+            downloadResultsButton.addEventListener('click', downloadResults);
+            restartQuizButton.addEventListener('click', restartQuiz);
+            
+            // Save progress when page is about to be unloaded
+            window.addEventListener('beforeunload', saveProgress);
+        }
+
+        // Show name input screen
+        function showNameScreen() {
+            welcomeScreen.classList.add('hidden');
+            nameScreen.classList.remove('hidden');
+            userNameInput.focus();
+        }
+
+        // Start the quiz
+        function startQuiz() {
+            userName = userNameInput.value.trim();
+            
+            if (!userName) {
+                alert("Please enter your name to continue.");
+                return;
+            }
+            
+            nameScreen.classList.add('hidden');
+            quizSection.classList.remove('hidden');
+            
+            loadQuestion();
+        }
+
+        // Load a question
+        function loadQuestion() {
+            feedbackElement.innerHTML = '';
+            feedbackElement.className = 'feedback';
+            
+            let currentBatch = quizBatches[currentBatchIndex];
+            
+            // If we've skipped all questions and need to loop back
+            if (currentQuestionIndex >= currentBatch.questions.length) {
+                // If all questions are answered or we've gone through all questions once
+                if (answeredQuestions.length >= 3 || skippedQuestions.length === 0) {
+                    showBatchComplete();
+                    return;
+                }
+                
+                // Reset to go through skipped questions
+                currentQuestionIndex = skippedQuestions[0];
+                skippedQuestions.shift();
+            }
+            
+            let questionData = currentBatch.questions[currentQuestionIndex];
+            
+            // Display the question
+            questionElement.textContent = questionData.question;
+            
+            // Clear previous options
+            optionsElement.innerHTML = '';
+            
+            // Add options
+            questionData.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                optionElement.addEventListener('click', selectOption);
+                optionsElement.appendChild(optionElement);
+            });
+            
+            selectedOption = null;
+            submitButton.disabled = true;
+            
+            // Update batch title and progress
+            batchTitleElement.textContent = currentBatch.name;
+            scoreElement.textContent = score;
+            updateProgressBar();
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const currentBatch = quizBatches[currentBatchIndex];
+            const progress = (answeredQuestions.length / 3) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Handle option selection
+        function selectOption(e) {
+            // Remove selected class from all options
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            e.target.classList.add('selected');
+            selectedOption = parseInt(e.target.dataset.index);
+            submitButton.disabled = false;
+        }
+
+        // Skip the current question
+        function skipQuestion() {
+            // Add current question to skipped questions if not already answered
+            if (!answeredQuestions.includes(currentQuestionIndex)) {
+                skippedQuestions.push(currentQuestionIndex);
+            }
+            
+            // Move to next question within the current batch
+            currentQuestionIndex++;
+            
+            // If we've reached the end of questions in this batch, loop back to skipped questions
+            if (currentQuestionIndex >= quizBatches[currentBatchIndex].questions.length) {
+                if (skippedQuestions.length > 0) {
+                    currentQuestionIndex = skippedQuestions[0];
+                    skippedQuestions.shift();
+                } else {
+                    // If no skipped questions and not enough correct answers, show feedback
+                    if (score < 3) {
+                        feedbackElement.textContent = "You need to answer at least 3 questions correctly to proceed.";
+                        feedbackElement.className = "feedback warning";
+                        currentQuestionIndex = 0; // Start over with the first question
+                    } else {
+                        showBatchComplete();
+                        return;
+                    }
+                }
+            }
+            
+            loadQuestion();
+        }
+
+        // Check the answer
+        function checkAnswer() {
+            let currentBatch = quizBatches[currentBatchIndex];
+            let questionData = currentBatch.questions[currentQuestionIndex];
+            let correctAnswerIndex = questionData.correctAnswer;
+            
+            // Record the result
+            const isCorrect = selectedOption === correctAnswerIndex;
+            userResults.push({
+                batch: currentBatch.name,
+                question: questionData.question,
+                userAnswer: questionData.options[selectedOption],
+                correctAnswer: questionData.options[correctAnswerIndex],
+                isCorrect: isCorrect
+            });
+            
+            if (isCorrect) {
+                // Correct answer
+                feedbackElement.textContent = "Correct!";
+                feedbackElement.className = "feedback success";
+                
+                // Add to answered questions if not already there
+                if (!answeredQuestions.includes(currentQuestionIndex)) {
+                    answeredQuestions.push(currentQuestionIndex);
+                    score++;
+                    scoreElement.textContent = score;
+                }
+                
+                // Remove from skipped if it was there
+                const skipIndex = skippedQuestions.indexOf(currentQuestionIndex);
+                if (skipIndex !== -1) {
+                    skippedQuestions.splice(skipIndex, 1);
+                }
+                
+                // Check if we've reached 3 correct answers
+                if (score >= 3) {
+                    setTimeout(() => {
+                        showBatchComplete();
+                    }, 1000);
+                    return;
+                }
+            } else {
+                // Incorrect answer
+                feedbackElement.textContent = "Incorrect. Try again or skip to another question.";
+                feedbackElement.className = "feedback error";
+            }
+            
+            // Move to next question after a delay
+            setTimeout(() => {
+                currentQuestionIndex++;
+                
+                // If we've reached the end of questions in this batch, loop back to skipped questions
+                if (currentQuestionIndex >= currentBatch.questions.length) {
+                    if (skippedQuestions.length > 0) {
+                        currentQuestionIndex = skippedQuestions[0];
+                        skippedQuestions.shift();
+                    } else {
+                        // If no skipped questions and not enough correct answers, show feedback
+                        if (score < 3) {
+                            feedbackElement.textContent = "You need to answer at least 3 questions correctly to proceed.";
+                            feedbackElement.className = "feedback warning";
+                            currentQuestionIndex = 0; // Start over with the first question
+                            loadQuestion();
+                            return;
+                        } else {
+                            showBatchComplete();
+                            return;
+                        }
+                    }
+                }
+                
+                loadQuestion();
+            }, 1500);
+        }
+
+        // Show batch complete screen
+        function showBatchComplete() {
+            quizSection.classList.add('hidden');
+            batchCompleteScreen.classList.remove('hidden');
+            batchScoreElement.textContent = `${score}/3`;
+        }
+
+        // Move to the next batch
+        function moveToNextBatch() {
+            currentBatchIndex++;
+            
+            if (currentBatchIndex < quizBatches.length) {
+                // Reset for new batch
+                currentQuestionIndex = 0;
+                score = 0;
+                answeredQuestions = [];
+                skippedQuestions = [];
+                
+                batchCompleteScreen.classList.add('hidden');
+                quizSection.classList.remove('hidden');
+                
+                loadQuestion();
+            } else {
+                // Quiz completed
+                showCompletionScreen();
+            }
+        }
+
+        // Show completion screen
+        function showCompletionScreen() {
+            batchCompleteScreen.classList.add('hidden');
+            completionScreen.classList.remove('hidden');
+            
+            // Set completion details
+            completionNameElement.textContent = userName;
+            certificateNameElement.textContent = userName;
+            
+            const today = new Date();
+            completionDateElement.textContent = today.toLocaleDateString();
+            
+            // Display results
+            displayResults();
+        }
+
+        // Display results
+        function displayResults() {
+            resultsListElement.innerHTML = '';
+            
+            let batchResults = {};
+            
+            // Group results by batch
+            userResults.forEach(result => {
+                if (!batchResults[result.batch]) {
+                    batchResults[result.batch] = [];
+                }
+                batchResults[result.batch].push(result);
+            });
+            
+            // Display results by batch
+            for (const batch in batchResults) {
+                const batchHeader = document.createElement('h4');
+                batchHeader.textContent = batch;
+                resultsListElement.appendChild(batchHeader);
+                
+                const correctCount = batchResults[batch].filter(r => r.isCorrect).length;
+                const totalCount = batchResults[batch].length;
+                
+                const batchSummary = document.createElement('p');
+                batchSummary.textContent = `Score: ${correctCount}/${totalCount}`;
+                resultsListElement.appendChild(batchSummary);
+                
+                batchResults[batch].forEach(result => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    resultItem.innerHTML = `
+                        <p><strong>${result.question}</strong></p>
+                        <p>Your answer: ${result.userAnswer}</p>
+                        <p style="color: ${result.isCorrect ? 'green' : 'red'}">
+                            ${result.isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                        </p>
+                    `;
+                    resultsListElement.appendChild(resultItem);
+                });
+            }
+        }
+
+        // Download results
+        function downloadResults() {
+            let resultsText = `Knowledge Module Quiz Results\n\n`;
+            resultsText += `Name: ${userName}\n`;
+            resultsText += `Date: ${new Date().toLocaleDateString()}\n\n`;
+            
+            let batchResults = {};
+            
+            // Group results by batch
+            userResults.forEach(result => {
+                if (!batchResults[result.batch]) {
+                    batchResults[result.batch] = [];
+                }
+                batchResults[result.batch].push(result);
+            });
+            
+            // Format results by batch
+            for (const batch in batchResults) {
+                resultsText += `\n${batch}\n`;
+                resultsText += `${'='.repeat(batch.length)}\n`;
+                
+                const correctCount = batchResults[batch].filter(r => r.isCorrect).length;
+                const totalCount = batchResults[batch].length;
+                
+                resultsText += `Score: ${correctCount}/${totalCount}\n\n`;
+                
+                batchResults[batch].forEach(result => {
+                    resultsText += `Question: ${result.question}\n`;
+                    resultsText += `Your answer: ${result.userAnswer}\n`;
+                    resultsText += `Correct answer: ${result.correctAnswer}\n`;
+                    resultsText += `Result: ${result.isCorrect ? 'Correct' : 'Incorrect'}\n\n`;
+                });
+            }
+            
+            // Create download link
+            const blob = new Blob([resultsText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Knowledge_Module_Quiz_Results_${userName.replace(/\s+/g, '_')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Restart the quiz
+        function restartQuiz() {
+            // Reset all quiz state
+            currentBatchIndex = 0;
+            currentQuestionIndex = 0;
+            score = 0;
+            answeredQuestions = [];
+            skippedQuestions = [];
+            userResults = [];
+            
+            // Show welcome screen
+            completionScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+            
+            // Clear local storage
+            localStorage.removeItem('quizProgress');
+        }
+
+        // Save progress to localStorage
+        function saveProgress() {
+            const progress = {
+                userName: userName,
+                currentBatchIndex: currentBatchIndex,
+                currentQuestionIndex: currentQuestionIndex,
+                score: score,
+                answeredQuestions: answeredQuestions,
+                skippedQuestions: skippedQuestions,
+                userResults: userResults
+            };
+            
+            localStorage.setItem('quizProgress', JSON.stringify(progress));
+        }
+
+        // Load progress from localStorage
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('quizProgress');
+            
+            if (savedProgress) {
+                const progress = JSON.parse(savedProgress);
+                
+                userName = progress.userName;
+                currentBatchIndex = progress.currentBatchIndex;
+                currentQuestionIndex = progress.currentQuestionIndex;
+                score = progress.score;
+                answeredQuestions = progress.answeredQuestions;
+                skippedQuestions = progress.skippedQuestions;
+                userResults = progress.userResults;
+                
+                // If we have a username, skip to the quiz
+                if (userName) {
+                    welcomeScreen.classList.add('hidden');
+                    nameScreen.classList.add('hidden');
+                    quizSection.classList.remove('hidden');
+                    
+                    // Update user name field
+                    userNameInput.value = userName;
+                    
+                    // Load the current question
+                    loadQuestion();
+                }
+            }
+        }
+
+        // Start the quiz
+        initQuiz();
+    </script>
+</body>
+</html>
