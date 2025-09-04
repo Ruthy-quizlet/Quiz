@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Knowledge Module Quiz</title>
+    <title>Australian Regulatory Compliance Module Overview Quiz</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -26,7 +26,7 @@
             margin-bottom: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .welcome-screen, .name-screen, .completion-screen, .batch-complete-screen {
+        .welcome-screen, .name-screen, .completion-screen {
             text-align: center;
             padding: 40px 20px;
         }
@@ -84,6 +84,13 @@
         .btn.restart:hover {
             background-color: #d32f2f;
         }
+        .btn.download {
+            background-color: #2196F3;
+            margin-top: 20px;
+        }
+        .btn.download:hover {
+            background-color: #0b7dda;
+        }
         .progress {
             margin-bottom: 20px;
             background-color: #e0e0e0;
@@ -113,7 +120,7 @@
             background-color: #fff3cd;
             color: #856404;
         }
-        .batch-title {
+        .quiz-title {
             color: #333;
             border-bottom: 2px solid #4CAF50;
             padding-bottom: 5px;
@@ -162,15 +169,58 @@
         .hidden {
             display: none;
         }
-        .batch-complete-message {
-            font-size: 24px;
+        .question-counter {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .perfect-score {
             color: #155724;
+            font-size: 24px;
             margin-bottom: 20px;
         }
-        .batch-score {
-            font-size: 36px;
-            color: #155724;
-            margin: 20px 0;
+        .incomplete-score {
+            color: #721c24;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .quiz-results {
+            text-align: left;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .attempts-info {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #e8f4f8;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .incorrect-answers {
+            color: #721c24;
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: left;
+        }
+        .attempt-history {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .attempt-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .download-section {
+            margin-top: 20px;
+            text-align: center;
         }
     </style>
 </head>
@@ -178,9 +228,11 @@
     <div class="container">
         <!-- Welcome Screen -->
         <div id="welcome-screen" class="welcome-screen">
-            <h1>Knowledge Module Quiz</h1>
-            <p>Welcome to the Knowledge Module Quiz. This quiz will test your knowledge about various modules including Aged Care, Health Care, Education, Energy, and Other specialized areas.</p>
-            <p>You must complete each batch with a score of 3/3 to proceed to the next batch.</p>
+            <h1>Australian Regulatory Compliance Module Overview Quiz</h1>
+            <p>Welcome to the Australian Regulatory Compliance Module Overview Quiz.</p>
+            <p>This quiz contains 30 questions about various regulatory compliance modules in Australia.</p>
+            <p><strong>You must answer all 30 questions correctly (30/30) to complete the quiz successfully.</strong></p>
+            <p>You can skip questions and return to them later, but you must get every question right to pass.</p>
             <button id="start-btn" class="btn">I'm Ready to Start</button>
         </div>
 
@@ -197,8 +249,9 @@
             <div class="progress">
                 <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
             </div>
-            <h2 class="batch-title" id="batch-title">Knowledge Module</h2>
-            <div class="score-display">Score: <span id="score">0</span>/3</div>
+            <h2 class="quiz-title">Australian Regulatory Compliance Module Overview Quiz</h2>
+            <div class="question-counter">Question <span id="question-number">1</span> of 30</div>
+            <div class="score-display">Correct Answers: <span id="correct-count">0</span>/30</div>
             <div id="feedback" class="feedback"></div>
             <div class="quiz-container" id="quiz-container">
                 <div class="question" id="question"></div>
@@ -210,328 +263,393 @@
             </div>
         </div>
 
-        <!-- Batch Complete Screen -->
-        <div id="batch-complete-screen" class="batch-complete-screen hidden">
-            <div class="batch-complete-message">Batch Completed Successfully!</div>
-            <div class="batch-score">Score: <span id="batch-score">3/3</span></div>
-            <p>Congratulations! You've completed this batch of questions.</p>
-            <button class="btn" id="next-batch-btn">Proceed to Next Batch</button>
-        </div>
-
         <!-- Completion Screen -->
         <div id="completion-screen" class="completion-screen hidden">
             <h1>Quiz Completed!</h1>
-            <p>Congratulations <span id="completion-name"></span>! You've successfully completed all batches of the Knowledge Module Quiz.</p>
-            <div class="certificate">
-                <h2>Certificate of Completion</h2>
-                <p>This certifies that</p>
-                <h3 id="certificate-name"></h3>
-                <p>has successfully completed the Knowledge Module Quiz</p>
-                <p>Date: <span id="completion-date"></span></p>
+            <div id="completion-message"></div>
+            <div id="certificate-section" class="hidden">
+                <div class="certificate">
+                    <h2>Certificate of Completion</h2>
+                    <p>This certifies that</p>
+                    <h3 id="certificate-name"></h3>
+                    <p>has successfully completed the Australian Regulatory Compliance Module Overview Quiz</p>
+                    <p>with a perfect score of 30/30</p>
+                    <p>Date: <span id="completion-date"></span></p>
+                </div>
+                <div id="attempts-info" class="attempts-info"></div>
+                <div id="quiz-results" class="quiz-results"></div>
+                <div class="download-section">
+                    <button id="download-report-btn" class="btn download">Download Complete Quiz Report</button>
+                </div>
             </div>
-            <div class="results-container">
-                <h3>Your Results:</h3>
-                <div id="results-list"></div>
-            </div>
-            <button class="btn" id="download-results-btn">Download Results</button>
-            <button class="btn restart" id="restart-quiz-btn">Exit Quiz</button>
+            <button class="btn restart" id="restart-quiz-btn">Start New Quiz</button>
         </div>
     </div>
 
     <script>
         // Quiz data structure
-        const quizBatches = [
+        const quizQuestions = [
             {
-                name: "AGED CARE MODULE",
-                questions: [
-                    {
-                        question: "Which of the following best describes the purpose of Home Care services?",
-                        options: [
-                            "A) Providing permanent accommodation for older Australians",
-                            "B) Supporting recipients in the comfort of their own home",
-                            "C) Offering lifestyle housing options",
-                            "D) Ensuring all aged care services meet quality standards"
-                        ],
-                        correctAnswer: 1
-                    },
-                    {
-                        question: "Retirement Villages are primarily regulated by:",
-                        options: [
-                            "A) Commonwealth Aged Care Act",
-                            "B) State and territory legislation",
-                            "C) Individual village operators",
-                            "D) Medicare regulations"
-                        ],
-                        correctAnswer: 1
-                    },
-                    {
-                        question: "Who is responsible for the governance of the aged care system according to the Registered Providers module?",
-                        options: [
-                            "A) Individual care providers only",
-                            "B) State governments exclusively",
-                            "C) The Commissioner of the Aged Care Quality and Safety Commission and Secretary of the Department of Health and Aged Care",
-                            "D) Retirement village operators"
-                        ],
-                        correctAnswer: 2
-                    },
-                    {
-                        question: "Which of the following is a key obligation under the Residential Care module?",
-                        options: [
-                            "A) Providing care only during business hours",
-                            "B) Refundable deposits management",
-                            "C) Focusing primarily on independent living",
-                            "D) Delivering services exclusively in consumers' homes"
-                        ],
-                        correctAnswer: 1
-                    }
-                ]
+                question: "Which module assists reporting entities with their regulatory compliance regarding money laundering and terrorism financing risks?",
+                options: [
+                    "Sanctions",
+                    "Anti-Money Laundering and Counter Terrorism Financing",
+                    "Cybersecurity",
+                    "Financial Advisory"
+                ],
+                correctAnswer: 1
             },
             {
-                name: "HEALTH CARE MODULE",
-                questions: [
-                    {
-                        question: "Which module(s) does the National Health (Floor Price for Certain Brands of Pharmaceutical Items) Amendment Determination (No. 5) 2024 (Cth) alert belong to?",
-                        options: [
-                            "A) Clinical Care and Allied Health Services only",
-                            "B) Clinical Care and Allied Health Services, Community Care and Services, NSW Healthcare, and Queensland Healthcare",
-                            "C) NSW Healthcare, Clinical Care and Allied Health Services, Queensland Healthcare, and Aged Care - Home Care",
-                            "D) NSW Healthcare, Clinical Care and Allied Health Services, and Queensland Healthcare"
-                        ],
-                        correctAnswer: 3
-                    },
-                    {
-                        question: "Under which core obligation in the Therapeutic Goods module does the Therapeutic Goods (Authorised Supply) Amendment Rules 2025 (Cth) alert fall?",
-                        options: [
-                            "A) Medicines",
-                            "B) Sampling of Therapeutic Goods",
-                            "C) Therapeutic Goods Administration Enforcement",
-                            "D) Biologicals"
-                        ],
-                        correctAnswer: 0
-                    },
-                    {
-                        question: "The impact of this alert 'Medicines and Poisons (Medicines) Amendment Regulation (No. 3) 2025 (Qld)' provides that: Healthcare providers must update their procedures to reflect the new terminology and definitions, particularly regarding continuing opioid dependence treatment. Out of all the core obligations provided below, please identify the correct core obligation this alert falls into:",
-                        options: [
-                            "A) Workforce Management",
-                            "B) Medication Management",
-                            "C) Emergency Services",
-                            "D) Patient Care"
-                        ],
-                        correctAnswer: 1
-                    },
-                    {
-                        question: "Under which core obligation in the NSW Healthcare module does the Health Insurance (Section 3C Diagnostic Imaging Services – Cardiac MRI for Myocarditis) Repeal Determination 2025 (Cth) alert fall?",
-                        options: [
-                            "A) Medical Imaging",
-                            "B) Health Research",
-                            "C) Medication Management",
-                            "D) Physical Environment"
-                        ],
-                        correctAnswer: 0
-                    }
-                ]
+                question: "What is the main regulator for the financial and asset management industries in Australia?",
+                options: [
+                    "Australian Prudential Regulation Authority (APRA)",
+                    "Australian Securities and Investment Commission (ASIC)",
+                    "Reserve Bank of Australia (RBA)",
+                    "Australian Competition and Consumer Commission (ACCC)"
+                ],
+                correctAnswer: 1
             },
             {
-                name: "EDUCATION MODULE",
-                questions: [
-                    {
-                        question: "What is the primary purpose of the Education and Care Services National Law and National Regulations in Australia?",
-                        options: [
-                            "A) To ensure children under 13 receive safe, quality care and education",
-                            "B) To regulate only tertiary education providers",
-                            "C) To manage retirement villages",
-                            "D) To oversee residential aged care facilities"
-                        ],
-                        correctAnswer: 0
-                    },
-                    {
-                        question: "Which of the following is NOT listed as a key provider responsibility in Child Care & Education Services?",
-                        options: [
-                            "A) Educational program and practice",
-                            "B) Children's health, safety, and wellbeing",
-                            "C) International student recruitment",
-                            "D) Staffing arrangements and supervisor certificates"
-                        ],
-                        correctAnswer: 2
-                    },
-                    {
-                        question: "The National Code of Practice applies specifically to which type of education?",
-                        options: [
-                            "A) Primary education",
-                            "B) Secondary education",
-                            "C) Overseas students",
-                            "D) Special needs education"
-                        ],
-                        correctAnswer: 2
-                    },
-                    {
-                        question: "Commonwealth tertiary education providers include:",
-                        options: [
-                            "A) Only universities",
-                            "B) Only vocational education and training organizations",
-                            "C) Universities, colleges, and training organizations",
-                            "D) Only international student providers"
-                        ],
-                        correctAnswer: 2
-                    }
-                ]
+                question: "Which module covers the wide range of regulatory requirements relating to the building industry, from licensing to planning and certification?",
+                options: [
+                    "Land & Property",
+                    "Building and Construction",
+                    "Facilities Management",
+                    "Infrastructure Resilience and Security"
+                ],
+                correctAnswer: 1
             },
             {
-                name: "ENERGY MODULE",
-                questions: [
-                    {
-                        question: "Which of the following is NOT one of the primary frameworks covered in the Energy Retail Markets section?",
-                        options: [
-                            "A) National Energy Customer Framework",
-                            "B) Northern Territory Energy Framework",
-                            "C) Western Australia Energy Framework",
-                            "D) National Gas Market Framework"
-                        ],
-                        correctAnswer: 3
-                    },
-                    {
-                        question: "What does wholesale energy include in the Australian energy context?",
-                        options: [
-                            "A) Only the retail sale of electricity to residential customers",
-                            "B) Only the distribution of gas to commercial properties",
-                            "C) The generation and selling of electricity and gas to retailers, plus distribution and transmission in the wholesale market",
-                            "D) Only the regulation of energy prices for consumers"
-                        ],
-                        correctAnswer: 2
-                    },
-                    {
-                        question: "When creating alerts related to customers who require special consideration due to medical equipment needs, which specific topic in the Energy Retail Markets module should legal editors reference?",
-                        options: [
-                            "A) Hardship Policies",
-                            "B) Customers' Life Support Equipment",
-                            "C) De-energisation (Disconnection)",
-                            "D) Compensation"
-                        ],
-                        correctAnswer: 1
-                    },
-                    {
-                        question: "Which of the following is a fundamental legislative requirement that energy wholesalers must navigate according to the Energy Wholesale Markets module?",
-                        options: [
-                            "A) Customer billing procedures",
-                            "B) Transition to the Net Zero Economy",
-                            "C) Retail store operations",
-                            "D) International energy trading"
-                        ],
-                        correctAnswer: 1
-                    },
-                    {
-                        question: "As a legal editor creating alerts for organisations in Western Australia regarding wholesale electricity operations, which specific section of the Energy Wholesale Markets module would be most relevant to reference?",
-                        options: [
-                            "A) NEM Operation (National Electricity Rules)",
-                            "B) Northern Territory Electricity System and Market Operator (NTESMO)",
-                            "C) ESM Operation (WEM Rules)",
-                            "D) Wholesale Gas Licensing"
-                        ],
-                        correctAnswer: 2
-                    }
-                ]
+                question: "What framework does the Cybersecurity module use to show how organizations can implement governance structures?",
+                options: [
+                    "ISO 27001",
+                    "COBIT",
+                    "US National Institute of Standards and Technology (NIST) Cybersecurity Framework",
+                    "Australian Signals Directorate Framework"
+                ],
+                correctAnswer: 2
             },
             {
-                name: "OTHER MODULES",
-                questions: [
-                    {
-                        question: "Which module requires organisations to maintain comprehensive programs for customer due diligence, suspicious matter reporting, and threshold transaction reporting?",
-                        options: [
-                            "A) Sanctions",
-                            "B) Anti-Money Laundering & Counter-Terrorism Financing (AML/CTF)",
-                            "C) Telecommunications",
-                            "D) Community Care and Services"
-                        ],
-                        correctAnswer: 1
-                    },
-                    {
-                        question: "The Heavy Vehicle National Law (HVNL) applies to vehicles over what weight threshold and introduces which key compliance concept?",
-                        options: [
-                            "A) 3.5 tonnes; duty of care",
-                            "B) 5.0 tonnes; shared responsibility",
-                            "C) 4.5 tonnes; chain of responsibility",
-                            "D) 6.0 tonnes; collective liability"
-                        ],
-                        correctAnswer: 2
-                    },
-                    {
-                        question: "Which of the following is NOT one of the four key areas where environmental compliance obligations arise?",
-                        options: [
-                            "A) Environmental approvals",
-                            "B) Environmental harm",
-                            "C) Development approvals",
-                            "D) Product safety standards"
-                        ],
-                        correctAnswer: 3
-                    },
-                    {
-                        question: "Community Care and Services providers obtain their contracts through which process, and their obligations are derived from which three main sources?",
-                        options: [
-                            "A) Direct government appointment; legislation, service agreements, and industry standards",
-                            "B) Competitive tender processes; legislation, individual service agreements, and government policy/standards",
-                            "C) Open market bidding; federal law, state regulations, and professional guidelines",
-                            "D) Merit-based selection; compliance frameworks, funding requirements, and quality measures"
-                        ],
-                        correctAnswer: 1
-                    }
-                ]
+                question: "Which module provides guidance on steps to ensure that bribery and common corruption risks are identified and minimized?",
+                options: [
+                    "Anti-Bribery and Corruption",
+                    "Corporations",
+                    "Competition and Consumer",
+                    "Global Environmental, Social and Governance (ESG)"
+                ],
+                correctAnswer: 0
+            },
+            {
+                question: "What does the Chain of Responsibility (CoR) principle in the Transport and Logistics module primarily address?",
+                options: [
+                    "Supply chain management",
+                    "Legal liability extension to all parties who influence heavy vehicle operations",
+                    "Vehicle maintenance responsibilities",
+                    "Driver training requirements"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "Which module assists organizations in pricing their related-party international transactions in accordance with Australia's laws?",
+                options: [
+                    "Tax",
+                    "Transfer Pricing",
+                    "Global Environmental, Social and Governance (ESG)",
+                    "Foreign Companies"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "What is the primary focus of the Modern Slavery module?",
+                options: [
+                    "Historical slavery practices",
+                    "Understanding modern slavery risks in operations and supply chains",
+                    "Human trafficking prevention",
+                    "Labor law compliance"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "Which module covers the requirements for the preparation of financial statements in accordance with Australian Accounting Standards?",
+                options: [
+                    "Tax",
+                    "Financial Advisory",
+                    "Financial Reports - Accounting and Auditing",
+                    "Corporations"
+                ],
+                correctAnswer: 2
+            },
+            {
+                question: "What is a key aspect of the Sanctions module?",
+                options: [
+                    "Creating international trade agreements",
+                    "Avoiding breaching applicable sanctions regimes",
+                    "Establishing diplomatic relations",
+                    "Managing corporate tax obligations"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "Which module is specifically tailored for organizations that process and/or sell food to the aged and other vulnerable persons?",
+                options: [
+                    "Food Service to Aged and Other Vulnerable Persons",
+                    "Aged Care",
+                    "Community Care and Services",
+                    "Clinical Care and Allied Health Services"
+                ],
+                correctAnswer: 0
+            },
+            {
+                question: "What is the focus of the Infrastructure Resilience and Security module?",
+                options: [
+                    "Building physical security systems",
+                    "Obligations under the critical infrastructure protection regime",
+                    "IT security protocols",
+                    "Emergency response planning"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "Which module covers the requirements for tertiary education providers to offer courses of study and qualifications?",
+                options: [
+                    "Education in Non-State Schools",
+                    "Commonwealth Tertiary Education",
+                    "Child Care and Education Services",
+                    "Clinical Care and Allied Health Services"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "What is the key focus of the Life Insurance module?",
+                options: [
+                    "Personal financial planning",
+                    "Regulatory compliance for life insurance businesses",
+                    "Insurance claim processing",
+                    "Customer relationship management"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "Which module addresses the legal responsibilities related to drones?",
+                options: [
+                    "Transport and Logistics",
+                    "Aviation",
+                    "Drones",
+                    "Infrastructure Resilience and Security"
+                ],
+                correctAnswer: 2
+            },
+            {
+                question: "What does the Private Health Insurance module primarily outline?",
+                options: [
+                    "Health insurance marketing strategies",
+                    "Patient care guidelines",
+                    "Regulatory requirements for private health insurers",
+                    "Hospital management procedures"
+                ],
+                correctAnswer: 2
+            },
+            {
+                question: "Which module covers the obligations of credit rating agencies as AFS licensees?",
+                options: [
+                    "Financial Advisory",
+                    "Credit Rating of Financial Products",
+                    "Australian Financial Services Licence (Product Issuers)",
+                    "Finance and Leasing Companies"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "What is the primary focus of the Electronic Transactions module?",
+                options: [
+                    "Online banking security",
+                    "Digital marketing compliance",
+                    "Meeting information management obligations electronically",
+                    "E-commerce taxation"
+                ],
+                correctAnswer: 2
+            },
+            {
+                question: "Which module addresses the requirements for energy suppliers and sellers in Australia for consumers?",
+                options: [
+                    "Energy - Retail Markets Overview",
+                    "Facilities Management",
+                    "Environment",
+                    "Infrastructure Resilience and Security"
+                ],
+                correctAnswer: 0
+            },
+            {
+                question: "What is a key aspect of the Intellectual Property module?",
+                options: [
+                    "International trade agreements",
+                    "Requirements for protecting, maintaining, and monitoring intellectual property",
+                    "Software development guidelines",
+                    "Content creation standards"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "Which module focuses on the obligations of participants in the telecommunication industry?",
+                options: [
+                    "Social Media",
+                    "Telecommunications",
+                    "Infrastructure Resilience and Security",
+                    "Electronic Transactions"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "What is the primary focus of the Workers Compensation Insurance module?",
+                options: [
+                    "Employee health benefits",
+                    "Workplace safety protocols",
+                    "Insurer obligations for workers compensation coverage",
+                    "Injury prevention strategies"
+                ],
+                correctAnswer: 2
+            },
+            {
+                question: "Which module covers the obligations related to franchising activities?",
+                options: [
+                    "Retail",
+                    "Franchising",
+                    "Competition and Consumer",
+                    "Corporations"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "What is a key aspect of the Social Media module?",
+                options: [
+                    "Digital marketing strategies",
+                    "Content creation guidelines",
+                    "Obligations related to employee conduct on social media",
+                    "Website development standards"
+                ],
+                correctAnswer: 2
+            },
+            {
+                question: "Which module addresses the obligations of casinos regarding gaming operations?",
+                options: [
+                    "Interactive Gambling",
+                    "Casinos",
+                    "Anti-Money Laundering and Counter Terrorism Financing",
+                    "Entertainment and Recreation"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "What is the primary focus of the New Zealand - Cybersecurity module?",
+                options: [
+                    "International cybersecurity laws",
+                    "Digital marketing compliance",
+                    "Securing digital information and systems in accordance with New Zealand legal obligations",
+                    "Software development standards"
+                ],
+                correctAnswer: 2
+            },
+            {
+                question: "What is a key focus of the New Zealand - Anti-Money Laundering and Countering Financing of Terrorism module?",
+                options: [
+                    "International financial regulations",
+                    "Banking security protocols",
+                    "Lessening the likelihood that entity's services could be used in association with criminal activity",
+                    "Digital transaction monitoring"
+                ],
+                correctAnswer: 2
+            },
+            {
+                question: "What is the primary focus of the New Zealand - Work Health and Safety module?",
+                options: [
+                    "Employee benefits management",
+                    "Ensuring health and safety of workers by eliminating or minimizing risks",
+                    "Workplace productivity enhancement",
+                    "Employee training programs"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "Which module covers the obligations of port authorities and operators in Western Australia?",
+                options: [
+                    "Transport and Logistics",
+                    "Western Australia Ports Management",
+                    "Infrastructure Resilience and Security",
+                    "Western Australia State Government"
+                ],
+                correctAnswer: 1
+            },
+            {
+                question: "What is a key aspect of the Charities module?",
+                options: [
+                    "Fundraising strategies",
+                    "Volunteer management",
+                    "Compliance obligations administered by ACNC",
+                    "Marketing for non-profits"
+                ],
+                correctAnswer: 2
             }
         ];
 
         // Quiz state
         let userName = "";
-        let currentBatchIndex = 0;
         let currentQuestionIndex = 0;
-        let score = 0;
         let selectedOption = null;
-        let answeredQuestions = [];
-        let userResults = [];
-        let skippedQuestions = [];
+        let correctAnswers = new Set();
+        let answeredQuestions = new Set();
+        let questionOrder = [];
+        let userAnswers = [];
+        let attemptCount = 1;
+        let attemptHistory = [];
+        let currentAttemptAnswers = [];
+        let allAttemptsDetails = []; // Detailed record of all attempts
 
         // DOM elements
         const welcomeScreen = document.getElementById('welcome-screen');
         const nameScreen = document.getElementById('name-screen');
         const quizSection = document.getElementById('quiz-section');
-        const batchCompleteScreen = document.getElementById('batch-complete-screen');
         const completionScreen = document.getElementById('completion-screen');
         
         const questionElement = document.getElementById('question');
         const optionsElement = document.getElementById('options');
         const submitButton = document.getElementById('submit-btn');
         const skipButton = document.getElementById('skip-btn');
-        const nextBatchButton = document.getElementById('next-batch-btn');
         const feedbackElement = document.getElementById('feedback');
-        const scoreElement = document.getElementById('score');
-        const batchTitleElement = document.getElementById('batch-title');
+        const questionNumberElement = document.getElementById('question-number');
+        const correctCountElement = document.getElementById('correct-count');
         const progressBar = document.getElementById('progress-bar');
-        const batchScoreElement = document.getElementById('batch-score');
         
         const startButton = document.getElementById('start-btn');
         const submitNameButton = document.getElementById('submit-name-btn');
         const userNameInput = document.getElementById('user-name');
-        const completionNameElement = document.getElementById('completion-name');
+        const completionMessageElement = document.getElementById('completion-message');
+        const certificateSectionElement = document.getElementById('certificate-section');
         const certificateNameElement = document.getElementById('certificate-name');
         const completionDateElement = document.getElementById('completion-date');
-        const resultsListElement = document.getElementById('results-list');
-        const downloadResultsButton = document.getElementById('download-results-btn');
         const restartQuizButton = document.getElementById('restart-quiz-btn');
+        const quizResultsElement = document.getElementById('quiz-results');
+        const attemptsInfoElement = document.getElementById('attempts-info');
+        const downloadReportButton = document.getElementById('download-report-btn');
 
         // Initialize the quiz
         function initQuiz() {
-            // Check if there's saved progress
-            loadProgress();
+            // Create question order (0-29)
+            questionOrder = Array.from({length: 30}, (_, i) => i);
             
             // Event listeners
             startButton.addEventListener('click', showNameScreen);
             submitNameButton.addEventListener('click', startQuiz);
             submitButton.addEventListener('click', checkAnswer);
             skipButton.addEventListener('click', skipQuestion);
-            nextBatchButton.addEventListener('click', moveToNextBatch);
-            downloadResultsButton.addEventListener('click', downloadResults);
             restartQuizButton.addEventListener('click', restartQuiz);
+            downloadReportButton.addEventListener('click', downloadQuizReport);
             
-            // Save progress when page is about to be unloaded
-            window.addEventListener('beforeunload', saveProgress);
+            // Allow Enter key in name input
+            userNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    startQuiz();
+                }
+            });
         }
 
         // Show name input screen
@@ -553,6 +671,22 @@
             nameScreen.classList.add('hidden');
             quizSection.classList.remove('hidden');
             
+            currentQuestionIndex = 0;
+            userAnswers = Array(30).fill(null);
+            currentAttemptAnswers = Array(30).fill(null);
+            
+            // Record start time for this attempt
+            const startTime = new Date();
+            
+            // Initialize attempt details
+            currentAttemptDetails = {
+                attemptNumber: attemptCount,
+                startTime: startTime,
+                endTime: null,
+                answers: [],
+                score: 0
+            };
+            
             loadQuestion();
         }
 
@@ -561,25 +695,35 @@
             feedbackElement.innerHTML = '';
             feedbackElement.className = 'feedback';
             
-            let currentBatch = quizBatches[currentBatchIndex];
-            
-            // If we've skipped all questions and need to loop back
-            if (currentQuestionIndex >= currentBatch.questions.length) {
-                // If all questions are answered or we've gone through all questions once
-                if (answeredQuestions.length >= 3 || skippedQuestions.length === 0) {
-                    showBatchComplete();
+            if (currentQuestionIndex >= questionOrder.length) {
+                // If we've gone through all questions, check completion status
+                if (correctAnswers.size >= 30) {
+                    // Save this attempt before showing completion
+                    saveCurrentAttempt();
+                    showCompletionScreen(true);
                     return;
+                } else if (answeredQuestions.size >= 30) {
+                    // Save this attempt before showing completion
+                    saveCurrentAttempt();
+                    showCompletionScreen(false);
+                    return;
+                } else {
+                    // Reset to first unanswered question
+                    for (let i = 0; i < questionOrder.length; i++) {
+                        if (!answeredQuestions.has(questionOrder[i])) {
+                            currentQuestionIndex = i;
+                            break;
+                        }
+                    }
                 }
-                
-                // Reset to go through skipped questions
-                currentQuestionIndex = skippedQuestions[0];
-                skippedQuestions.shift();
             }
             
-            let questionData = currentBatch.questions[currentQuestionIndex];
+            let questionIndex = questionOrder[currentQuestionIndex];
+            let questionData = quizQuestions[questionIndex];
             
             // Display the question
             questionElement.textContent = questionData.question;
+            questionNumberElement.textContent = questionIndex + 1;
             
             // Clear previous options
             optionsElement.innerHTML = '';
@@ -592,21 +736,28 @@
                 optionElement.dataset.index = index;
                 optionElement.addEventListener('click', selectOption);
                 optionsElement.appendChild(optionElement);
+                
+                // If this option was previously selected, mark it
+                if (userAnswers[questionIndex] === index) {
+                    optionElement.classList.add('selected');
+                    selectedOption = index;
+                    submitButton.disabled = false;
+                }
             });
             
-            selectedOption = null;
-            submitButton.disabled = true;
+            if (userAnswers[questionIndex] === null) {
+                selectedOption = null;
+                submitButton.disabled = true;
+            }
             
-            // Update batch title and progress
-            batchTitleElement.textContent = currentBatch.name;
-            scoreElement.textContent = score;
-            updateProgressBar();
+            // Update progress
+            updateProgress();
         }
 
-        // Update progress bar
-        function updateProgressBar() {
-            const currentBatch = quizBatches[currentBatchIndex];
-            const progress = (answeredQuestions.length / 3) * 100;
+        // Update progress display
+        function updateProgress() {
+            correctCountElement.textContent = correctAnswers.size;
+            const progress = (correctAnswers.size / 30) * 100;
             progressBar.style.width = `${progress}%`;
         }
 
@@ -625,236 +776,268 @@
 
         // Skip the current question
         function skipQuestion() {
-            // Add current question to skipped questions if not already answered
-            if (!answeredQuestions.includes(currentQuestionIndex)) {
-                skippedQuestions.push(currentQuestionIndex);
-            }
-            
-            // Move to next question within the current batch
+            // Move to next question
             currentQuestionIndex++;
-            
-            // If we've reached the end of questions in this batch, loop back to skipped questions
-            if (currentQuestionIndex >= quizBatches[currentBatchIndex].questions.length) {
-                if (skippedQuestions.length > 0) {
-                    currentQuestionIndex = skippedQuestions[0];
-                    skippedQuestions.shift();
-                } else {
-                    // If no skipped questions and not enough correct answers, show feedback
-                    if (score < 3) {
-                        feedbackElement.textContent = "You need to answer at least 3 questions correctly to proceed.";
-                        feedbackElement.className = "feedback warning";
-                        currentQuestionIndex = 0; // Start over with the first question
-                    } else {
-                        showBatchComplete();
-                        return;
-                    }
-                }
-            }
-            
             loadQuestion();
         }
 
         // Check the answer
         function checkAnswer() {
-            let currentBatch = quizBatches[currentBatchIndex];
-            let questionData = currentBatch.questions[currentQuestionIndex];
+            let questionIndex = questionOrder[currentQuestionIndex];
+            let questionData = quizQuestions[questionIndex];
             let correctAnswerIndex = questionData.correctAnswer;
             
-            // Record the result
-            const isCorrect = selectedOption === correctAnswerIndex;
-            userResults.push({
-                batch: currentBatch.name,
+            // Store user's answer
+            userAnswers[questionIndex] = selectedOption;
+            currentAttemptAnswers[questionIndex] = selectedOption;
+            
+            // Record this answer in the current attempt details
+            currentAttemptDetails.answers[questionIndex] = {
+                questionIndex: questionIndex,
                 question: questionData.question,
-                userAnswer: questionData.options[selectedOption],
-                correctAnswer: questionData.options[correctAnswerIndex],
-                isCorrect: isCorrect
-            });
+                userAnswer: selectedOption,
+                userAnswerText: questionData.options[selectedOption],
+                correctAnswer: correctAnswerIndex,
+                correctAnswerText: questionData.options[correctAnswerIndex],
+                isCorrect: selectedOption === correctAnswerIndex,
+                timestamp: new Date()
+            };
+            
+            // Mark question as answered
+            answeredQuestions.add(questionIndex);
+            
+            const isCorrect = selectedOption === correctAnswerIndex;
             
             if (isCorrect) {
-                // Correct answer
+                correctAnswers.add(questionIndex);
                 feedbackElement.textContent = "Correct!";
                 feedbackElement.className = "feedback success";
-                
-                // Add to answered questions if not already there
-                if (!answeredQuestions.includes(currentQuestionIndex)) {
-                    answeredQuestions.push(currentQuestionIndex);
-                    score++;
-                    scoreElement.textContent = score;
-                }
-                
-                // Remove from skipped if it was there
-                const skipIndex = skippedQuestions.indexOf(currentQuestionIndex);
-                if (skipIndex !== -1) {
-                    skippedQuestions.splice(skipIndex, 1);
-                }
-                
-                // Check if we've reached 3 correct answers
-                if (score >= 3) {
-                    setTimeout(() => {
-                        showBatchComplete();
-                    }, 1000);
-                    return;
-                }
             } else {
-                // Incorrect answer
-                feedbackElement.textContent = "Incorrect. Try again or skip to another question.";
+                // Remove from correct answers if it was previously correct
+                correctAnswers.delete(questionIndex);
+                feedbackElement.textContent = "Incorrect. Please try again or skip to continue.";
                 feedbackElement.className = "feedback error";
+            }
+            
+            // Check if all questions are answered correctly
+            if (correctAnswers.size >= 30) {
+                setTimeout(() => {
+                    saveCurrentAttempt();
+                    showCompletionScreen(true);
+                }, 2000);
+                return;
+            }
+            
+            // Check if all questions are answered (but not all correct)
+            if (answeredQuestions.size >= 30 && correctAnswers.size < 30) {
+                setTimeout(() => {
+                    saveCurrentAttempt();
+                    showCompletionScreen(false);
+                }, 2000);
+                return;
             }
             
             // Move to next question after a delay
             setTimeout(() => {
                 currentQuestionIndex++;
-                
-                // If we've reached the end of questions in this batch, loop back to skipped questions
-                if (currentQuestionIndex >= currentBatch.questions.length) {
-                    if (skippedQuestions.length > 0) {
-                        currentQuestionIndex = skippedQuestions[0];
-                        skippedQuestions.shift();
-                    } else {
-                        // If no skipped questions and not enough correct answers, show feedback
-                        if (score < 3) {
-                            feedbackElement.textContent = "You need to answer at least 3 questions correctly to proceed.";
-                            feedbackElement.className = "feedback warning";
-                            currentQuestionIndex = 0; // Start over with the first question
-                            loadQuestion();
-                            return;
-                        } else {
-                            showBatchComplete();
-                            return;
-                        }
-                    }
-                }
-                
                 loadQuestion();
-            }, 1500);
+            }, 2000);
         }
 
-        // Show batch complete screen
-        function showBatchComplete() {
-            quizSection.classList.add('hidden');
-            batchCompleteScreen.classList.remove('hidden');
-            batchScoreElement.textContent = `${score}/3`;
-        }
-
-        // Move to the next batch
-        function moveToNextBatch() {
-            currentBatchIndex++;
+        // Save the current attempt
+        function saveCurrentAttempt() {
+            // Set end time
+            currentAttemptDetails.endTime = new Date();
+            currentAttemptDetails.score = correctAnswers.size;
             
-            if (currentBatchIndex < quizBatches.length) {
-                // Reset for new batch
-                currentQuestionIndex = 0;
-                score = 0;
-                answeredQuestions = [];
-                skippedQuestions = [];
-                
-                batchCompleteScreen.classList.add('hidden');
-                quizSection.classList.remove('hidden');
-                
-                loadQuestion();
-            } else {
-                // Quiz completed
-                showCompletionScreen();
+            // Add to all attempts details
+            allAttemptsDetails.push(currentAttemptDetails);
+            
+            const incorrectAnswers = [];
+            
+            for (let i = 0; i < quizQuestions.length; i++) {
+                if (currentAttemptAnswers[i] !== null && currentAttemptAnswers[i] !== quizQuestions[i].correctAnswer) {
+                    incorrectAnswers.push({
+                        questionIndex: i,
+                        question: quizQuestions[i].question,
+                        userAnswer: quizQuestions[i].options[currentAttemptAnswers[i]],
+                        correctAnswer: quizQuestions[i].options[quizQuestions[i].correctAnswer]
+                    });
+                }
             }
+            
+            attemptHistory.push({
+                attemptNumber: attemptCount,
+                score: correctAnswers.size,
+                incorrectAnswers: incorrectAnswers
+            });
+            
+            attemptCount++;
         }
 
         // Show completion screen
-        function showCompletionScreen() {
-            batchCompleteScreen.classList.add('hidden');
+        function showCompletionScreen(passed) {
+            quizSection.classList.add('hidden');
             completionScreen.classList.remove('hidden');
             
-            // Set completion details
-            completionNameElement.textContent = userName;
-            certificateNameElement.textContent = userName;
-            
-            const today = new Date();
-            completionDateElement.textContent = today.toLocaleDateString();
-            
-            // Display results
-            displayResults();
-        }
-
-        // Display results
-        function displayResults() {
-            resultsListElement.innerHTML = '';
-            
-            let batchResults = {};
-            
-            // Group results by batch
-            userResults.forEach(result => {
-                if (!batchResults[result.batch]) {
-                    batchResults[result.batch] = [];
+            if (passed) {
+                // Perfect score - show certificate
+                completionMessageElement.innerHTML = `
+                    <div class="perfect-score">🎉 Congratulations ${userName}! 🎉</div>
+                    <p>You have successfully completed the Australian Regulatory Compliance Module Overview Quiz with a perfect score of 30/30!</p>
+                `;
+                
+                certificateSectionElement.classList.remove('hidden');
+                certificateNameElement.textContent = userName;
+                
+                const today = new Date();
+                completionDateElement.textContent = today.toLocaleDateString();
+                
+                // Display attempts information
+                displayAttemptsInfo();
+                
+                // Display quiz results
+                displayQuizResults();
+            } else {
+                // Did not get perfect score
+                completionMessageElement.innerHTML = `
+                    <div class="incomplete-score">Quiz Completed</div>
+                    <p>Hello ${userName}, you have answered all 30 questions.</p>
+                    <p>Your score: ${correctAnswers.size}/30</p>
+                    <p><strong>You need a perfect score of 30/30 to pass this quiz.</strong></p>
+                    <p>Please try again to achieve the required score.</p>
+                `;
+                
+                // Display incorrect answers
+                const lastAttempt = attemptHistory[attemptHistory.length - 1];
+                if (lastAttempt && lastAttempt.incorrectAnswers.length > 0) {
+                    let incorrectHtml = `<div class="incorrect-answers">
+                        <h3>Incorrect Answers:</h3>
+                        <ul>`;
+                    
+                    lastAttempt.incorrectAnswers.forEach(item => {
+                        incorrectHtml += `<li>
+                            <p><strong>Question ${item.questionIndex + 1}:</strong> ${item.question}</p>
+                            <p>Your answer: ${item.userAnswer}</p>
+                            <p>Correct answer: ${item.correctAnswer}</p>
+                        </li>`;
+                    });
+                    
+                    incorrectHtml += `</ul></div>`;
+                    completionMessageElement.innerHTML += incorrectHtml;
                 }
-                batchResults[result.batch].push(result);
-            });
+                
+                certificateSectionElement.classList.add('hidden');
+            }
+        }
+        
+        // Display attempts information
+        function displayAttemptsInfo() {
+            attemptsInfoElement.innerHTML = `<h3>Attempt Summary:</h3>`;
             
-            // Display results by batch
-            for (const batch in batchResults) {
-                const batchHeader = document.createElement('h4');
-                batchHeader.textContent = batch;
-                resultsListElement.appendChild(batchHeader);
+            if (attemptHistory.length === 1) {
+                attemptsInfoElement.innerHTML += `<p>Congratulations! You passed on your first attempt with a perfect score of 30/30!</p>`;
+            } else {
+                attemptsInfoElement.innerHTML += `
+                    <p>You completed the quiz successfully on attempt #${attemptHistory.length} with a perfect score of 30/30.</p>
+                    <div class="attempt-history">
+                        <h4>Previous Attempts:</h4>
+                `;
                 
-                const correctCount = batchResults[batch].filter(r => r.isCorrect).length;
-                const totalCount = batchResults[batch].length;
-                
-                const batchSummary = document.createElement('p');
-                batchSummary.textContent = `Score: ${correctCount}/${totalCount}`;
-                resultsListElement.appendChild(batchSummary);
-                
-                batchResults[batch].forEach(result => {
-                    const resultItem = document.createElement('div');
-                    resultItem.className = 'result-item';
-                    resultItem.innerHTML = `
-                        <p><strong>${result.question}</strong></p>
-                        <p>Your answer: ${result.userAnswer}</p>
-                        <p style="color: ${result.isCorrect ? 'green' : 'red'}">
-                            ${result.isCorrect ? '✓ Correct' : '✗ Incorrect'}
-                        </p>
+                for (let i = 0; i < attemptHistory.length - 1; i++) {
+                    const attempt = attemptHistory[i];
+                    attemptsInfoElement.innerHTML += `
+                        <div class="attempt-item">
+                            <p><strong>Attempt #${attempt.attemptNumber}:</strong> Score ${attempt.score}/30</p>
+                            <p>Incorrect answers: ${attempt.incorrectAnswers.length}</p>
+                        </div>
                     `;
-                    resultsListElement.appendChild(resultItem);
-                });
+                }
+                
+                attemptsInfoElement.innerHTML += `</div>`;
             }
         }
+        
+        // Display quiz results
+        function displayQuizResults() {
+            quizResultsElement.innerHTML = '<h3>Quiz Results:</h3>';
+            
+            quizQuestions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const correctAnswer = question.correctAnswer;
+                const isCorrect = userAnswer === correctAnswer;
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <p><strong>Question ${index + 1}:</strong> ${question.question}</p>
+                    <p><strong>Your answer:</strong> ${question.options[userAnswer]}</p>
+                    <p><strong>Status:</strong> <span style="color: ${isCorrect ? 'green' : 'red'}">${isCorrect ? 'Correct' : 'Incorrect'}</span></p>
+                `;
+                
+                quizResultsElement.appendChild(resultItem);
+            });
+        }
 
-        // Download results
-        function downloadResults() {
-            let resultsText = `Knowledge Module Quiz Results\n\n`;
-            resultsText += `Name: ${userName}\n`;
-            resultsText += `Date: ${new Date().toLocaleDateString()}\n\n`;
+        // Generate and download quiz report
+        function downloadQuizReport() {
+            // Create report content
+            let reportContent = `Australian Regulatory Compliance Module Overview Quiz - Report\n`;
+            reportContent += `===============================================================\n\n`;
+            reportContent += `Name: ${userName}\n`;
+            reportContent += `Date: ${new Date().toLocaleDateString()}\n`;
+            reportContent += `Final Score: 30/30\n`;
+            reportContent += `Number of Attempts: ${attemptHistory.length}\n\n`;
             
-            let batchResults = {};
+            // Add attempt history
+            reportContent += `ATTEMPT HISTORY\n`;
+            reportContent += `===============\n\n`;
             
-            // Group results by batch
-            userResults.forEach(result => {
-                if (!batchResults[result.batch]) {
-                    batchResults[result.batch] = [];
-                }
-                batchResults[result.batch].push(result);
+            allAttemptsDetails.forEach((attempt, index) => {
+                reportContent += `Attempt #${attempt.attemptNumber}\n`;
+                reportContent += `Date: ${attempt.startTime.toLocaleDateString()}\n`;
+                reportContent += `Time Started: ${attempt.startTime.toLocaleTimeString()}\n`;
+                reportContent += `Time Completed: ${attempt.endTime.toLocaleTimeString()}\n`;
+                reportContent += `Score: ${attempt.score}/30\n\n`;
+                
+                reportContent += `Answers for Attempt #${attempt.attemptNumber}:\n`;
+                reportContent += `----------------------------\n`;
+                
+                // Sort answers by question index
+                const sortedAnswers = [...attempt.answers].filter(a => a).sort((a, b) => a.questionIndex - b.questionIndex);
+                
+                sortedAnswers.forEach(answer => {
+                    reportContent += `Question ${answer.questionIndex + 1}: ${answer.question}\n`;
+                    reportContent += `Your Answer: ${answer.userAnswerText}\n`;
+                    reportContent += `Correct Answer: ${answer.correctAnswerText}\n`;
+                    reportContent += `Status: ${answer.isCorrect ? 'Correct' : 'Incorrect'}\n\n`;
+                });
+                
+                reportContent += `\n`;
             });
             
-            // Format results by batch
-            for (const batch in batchResults) {
-                resultsText += `\n${batch}\n`;
-                resultsText += `${'='.repeat(batch.length)}\n`;
-                
-                const correctCount = batchResults[batch].filter(r => r.isCorrect).length;
-                const totalCount = batchResults[batch].length;
-                
-                resultsText += `Score: ${correctCount}/${totalCount}\n\n`;
-                
-                batchResults[batch].forEach(result => {
-                    resultsText += `Question: ${result.question}\n`;
-                    resultsText += `Your answer: ${result.userAnswer}\n`;
-                    resultsText += `Correct answer: ${result.correctAnswer}\n`;
-                    resultsText += `Result: ${result.isCorrect ? 'Correct' : 'Incorrect'}\n\n`;
-                });
-            }
+            // Add final quiz results
+            reportContent += `FINAL QUIZ RESULTS\n`;
+            reportContent += `=================\n\n`;
             
-            // Create download link
-            const blob = new Blob([resultsText], { type: 'text/plain' });
+            quizQuestions.forEach((question, index) => {
+                const lastAttempt = allAttemptsDetails[allAttemptsDetails.length - 1];
+                const answer = lastAttempt.answers[index];
+                
+                if (answer) {
+                    reportContent += `Question ${index + 1}: ${question.question}\n`;
+                    reportContent += `Your Answer: ${question.options[answer.userAnswer]}\n`;
+                    reportContent += `Correct Answer: ${question.options[question.correctAnswer]}\n`;
+                    reportContent += `Status: ${answer.isCorrect ? 'Correct' : 'Incorrect'}\n\n`;
+                }
+            });
+            
+            // Create a blob and download
+            const blob = new Blob([reportContent], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Knowledge_Module_Quiz_Results_${userName.replace(/\s+/g, '_')}.txt`;
+            a.download = `${userName.replace(/\s+/g, '_')}_Quiz_Report_${new Date().toISOString().slice(0,10)}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -863,65 +1046,20 @@
 
         // Restart the quiz
         function restartQuiz() {
-            // Reset all quiz state
-            currentBatchIndex = 0;
+            // Reset quiz state but keep attempt history
             currentQuestionIndex = 0;
-            score = 0;
-            answeredQuestions = [];
-            skippedQuestions = [];
-            userResults = [];
+            correctAnswers = new Set();
+            answeredQuestions = new Set();
+            selectedOption = null;
+            userAnswers = Array(30).fill(null);
+            currentAttemptAnswers = Array(30).fill(null);
             
             // Show welcome screen
             completionScreen.classList.add('hidden');
             welcomeScreen.classList.remove('hidden');
             
-            // Clear local storage
-            localStorage.removeItem('quizProgress');
-        }
-
-        // Save progress to localStorage
-        function saveProgress() {
-            const progress = {
-                userName: userName,
-                currentBatchIndex: currentBatchIndex,
-                currentQuestionIndex: currentQuestionIndex,
-                score: score,
-                answeredQuestions: answeredQuestions,
-                skippedQuestions: skippedQuestions,
-                userResults: userResults
-            };
-            
-            localStorage.setItem('quizProgress', JSON.stringify(progress));
-        }
-
-        // Load progress from localStorage
-        function loadProgress() {
-            const savedProgress = localStorage.getItem('quizProgress');
-            
-            if (savedProgress) {
-                const progress = JSON.parse(savedProgress);
-                
-                userName = progress.userName;
-                currentBatchIndex = progress.currentBatchIndex;
-                currentQuestionIndex = progress.currentQuestionIndex;
-                score = progress.score;
-                answeredQuestions = progress.answeredQuestions;
-                skippedQuestions = progress.skippedQuestions;
-                userResults = progress.userResults;
-                
-                // If we have a username, skip to the quiz
-                if (userName) {
-                    welcomeScreen.classList.add('hidden');
-                    nameScreen.classList.add('hidden');
-                    quizSection.classList.remove('hidden');
-                    
-                    // Update user name field
-                    userNameInput.value = userName;
-                    
-                    // Load the current question
-                    loadQuestion();
-                }
-            }
+            // Clear name input
+            userNameInput.value = '';
         }
 
         // Start the quiz
